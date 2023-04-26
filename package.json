@@ -10,6 +10,12 @@
   },
   "devDependencies": {
     "@types/node": "^18",
-    "nuxt": "^3.4.2"
+    "nuxt": "^3.4.2",
+    "sass": "^1.62.1",
+    "sass-loader": "^13.2.2"
+  },
+  "dependencies": {
+    "@tanstack/vue-query": "^4.29.5",
+    "zod": "^3.21.4"
   }
 }
