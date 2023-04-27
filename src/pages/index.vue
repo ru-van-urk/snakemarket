@@ -1,53 +1,72 @@
 <script setup lang="ts">
-  import { useQuery } from "@tanstack/vue-query";
-  import { z } from "zod";
+  import { useProducts } from "~/composables/useProducts.js";
+  import FilterBar from "~/components/filter-bar.vue";
+  import { Filters } from "~/utils/getProductFilters";
 
-  const config = useRuntimeConfig();
+  const { data: products, isError, error, isLoading } = useProducts();
 
-  const productSchema = z.object({
-    ProductID: z.number(),
-    MainDescription: z.string(),
-    Brand: z.string().nullable(),
-    WebSubGroups: z.array(z.any()),
-    ProductOffers: z.array(z.any()),
-    ProductPrices: z.array(z.object({ RegularPrice: z.number() })),
-    ProductPictures: z.array(
-      z.object({
-        Url: z.string(),
-        IsPrimary: z.boolean(),
-      })
-    ),
-  });
+  const filteredProducts = ref(products.value);
+  watch(products, () => (filteredProducts.value = products.value));
 
-  const {
-    data: products,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["DekaProducts"],
-    queryFn: () =>
-      fetch(
-        `https://api.dekamarkt.nl/v1/assortmentcache/group/281/104?api_key=${config.public.dekaApiKey}`
-      )
-        .then((res) => res.json())
-        .then((val) => z.array(productSchema).parse(val)),
-  });
+  const handleFilters = (filters: Filters) => {
+    const activeFilters = filters.map((filter) => ({
+      ...filter,
+      options: filter.options.filter((opt) => opt.checked),
+    }));
+
+    const anOfferIsSelected = activeFilters
+      .find((filter) => filter.id === "offers")
+      ?.options.some((opt) => opt.checked);
+
+    const filtered = products.value?.filter((product) => {
+      const getActive = (id: string) =>
+        activeFilters
+          .find((filter) => filter.id === id)
+          ?.options.map((opt) => opt.value);
+
+      const productBrandId = product.BrandInfo?.BrandID;
+      const productGroupIds = product.WebSubGroups.map(
+        (group) => group.WebSubGroupID
+      );
+      const productOfferIds = product.ProductOffers.map(
+        (offer) => offer.Offer.OfferID
+      );
+
+      const productBrandIsActive = productBrandId
+        ? getActive("brands")?.includes(productBrandId)
+        : undefined;
+
+      const productGroupIsActive = getActive("groups")?.some((activeId) =>
+        productGroupIds.includes(activeId)
+      );
+
+      const productOfferIsActive = getActive("offers")?.some((activeId) =>
+        productOfferIds.includes(activeId)
+      );
+
+      if (anOfferIsSelected && productOfferIsActive) return true;
+
+      if (!anOfferIsSelected && productBrandIsActive && productGroupIsActive)
+        return true;
+    });
+
+    filteredProducts.value = filtered;
+  };
 </script>
 
 <template>
-  <main>
+  <span v-if="isLoading">Loading...</span>
+  <span v-else-if="isError">Error: {{ (error as Error).message }}</span>
+  <main v-else-if="products">
+    <FilterBar :products="products" @set-filter="handleFilters" />
     <section>
-      <h1>Index</h1>
-      <span v-if="isLoading">Loading...</span>
-      <span v-else-if="isError">Error: {{ (error as Error).message }}</span>
-
-      <ul v-else-if="products">
-        <li v-for="product in products" :key="product.ProductID">
+      <ul>
+        <li v-for="product in filteredProducts" :key="product.ProductID">
           <img
             :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
             width="200"
           />
+          <h1>{{ product.BrandInfo?.Description }}</h1>
           <h2>{{ product.MainDescription }}</h2>
           <p>€{{ product.ProductPrices[0].RegularPrice }}</p>
 
@@ -56,8 +75,6 @@
             <p>0</p>
             <button class="add">+</button>
           </span>
-
-          <!-- {{ JSON.stringify(product) }} -->
         </li>
       </ul>
     </section>
@@ -67,6 +84,12 @@
 <style scoped lang="scss">
   main {
     width: 100vw;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
   }
 
   section {
@@ -92,7 +115,7 @@
     align-items: center;
     justify-content: center;
 
-    margin: 80px 0;
+    margin: 80px;
   }
 
   .quantity-controller {

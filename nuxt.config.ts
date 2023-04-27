@@ -7,4 +7,6 @@ export default defineNuxtConfig({
       dekaApiKey: process.env.DEKA_API_KEY,
     },
   },
+
+  modules: ["@nuxtjs/tailwindcss"],
 });
