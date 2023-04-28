@@ -18,18 +18,39 @@
   } from "@headlessui/vue";
   import { XMarkIcon } from "@heroicons/vue/24/outline";
   import { ChevronDownIcon } from "@heroicons/vue/24/solid";
-  import { type Product } from "~/composables/useProducts";
-  import { Filters, getProductFilters } from "~/utils/getProductFilters";
+  import { Filters } from "~/utils/getProductFilters";
+  import { Sort, SortType } from "~/utils/getSortedProducts";
 
-  const props = defineProps<{ products: Product[] }>();
+  const { filters } = defineProps<{
+    filters: Filters;
+  }>();
 
   const open = ref(false);
 
-  const sortOptions = [{ name: "Prijs", href: "#" }];
+  const emit = defineEmits<{
+    (event: "filter-products"): void;
+    (event: "sort-products", sort?: Sort): void;
+  }>();
 
-  const filters = getProductFilters(props.products);
-  const emit = defineEmits<{ (event: "set-filter", filters: Filters): void }>();
-  emit("set-filter", filters);
+  const activeSort = ref<Sort | undefined>();
+
+  const handleSort = (type: SortType) => {
+    let newSort: Sort | undefined = undefined;
+
+    if (!activeSort.value || activeSort.value.type !== type) {
+      newSort = { type, sortOrder: "ASC" };
+    }
+    if (activeSort.value?.sortOrder === "ASC") {
+      newSort = { type, sortOrder: "DES" };
+    }
+    if (activeSort.value?.sortOrder === "DES") {
+      newSort = undefined;
+    }
+
+    activeSort.value = newSort;
+
+    emit("sort-products", newSort);
+  };
 </script>
 
 <template>
@@ -82,7 +103,7 @@
               <Disclosure
                 as="div"
                 v-for="section in filters"
-                :key="filter.name"
+                :key="section.name"
                 class="border-t border-gray-200 px-4 py-6"
                 v-slot="{ open }"
               >
@@ -95,10 +116,12 @@
                     </span>
                     <span class="ml-6 flex items-center">
                       <ChevronDownIcon
-                        :class="[
-                          open ? '-rotate-180' : 'rotate-0',
-                          'h-5 w-5 transform',
-                        ]"
+                        :class="
+                          cn(
+                            open ? '-rotate-180' : 'rotate-0',
+                            'h-5 w-5 transform'
+                          )
+                        "
                         aria-hidden="true"
                       />
                     </span>
@@ -113,8 +136,8 @@
                     >
                       <input
                         :id="`filter-mobile-${section.id}-${optionIdx}`"
-                        :name="`${section.id}[]`"
-                        :value="option.value"
+                        v-model="option.checked"
+                        @change="() => emit('filter-products')"
                         type="checkbox"
                         class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
                       />
@@ -179,19 +202,36 @@
               >
                 <div class="py-1">
                   <MenuItem
-                    v-for="option in sortOptions"
-                    :key="option.name"
+                    v-for="option in sortTypes"
+                    :key="option"
                     v-slot="{ active }"
                   >
-                    <a
-                      :href="option.href"
-                      :class="[
-                        active ? 'bg-gray-100' : '',
-                        'block px-4 py-2 text-sm font-medium text-gray-900',
-                      ]"
+                    <span
+                      @click="() => handleSort(option)"
+                      :class="
+                        cn(
+                          'flex w-full justify-between items-center',
+                          active ? 'bg-gray-100' : ''
+                        )
+                      "
                     >
-                      {{ option.name }}
-                    </a>
+                      <p
+                        class="'block px-4 py-2 text-sm font-medium text-gray-900'"
+                      >
+                        {{ option }}
+                      </p>
+
+                      <ChevronDownIcon
+                        v-if="activeSort && option === activeSort.type"
+                        :class="
+                          cn(
+                            'flex-shrink-0 h-5 w-5 text-gray-400 mr-2',
+                            activeSort.sortOrder === 'DES' && 'rotate-180'
+                          )
+                        "
+                        aria-hidden="true"
+                      />
+                    </span>
                   </MenuItem>
                 </div>
               </MenuItems>
@@ -219,13 +259,7 @@
                   class="group inline-flex items-center justify-center text-sm font-medium text-gray-700 hover:text-gray-900"
                 >
                   <span>{{ filter.name }}</span>
-                  <span
-                    v-if="filter.options.some((opt) => opt.checked)"
-                    class="ml-1.5 rounded py-0.5 px-1.5 bg-gray-200 text-xs font-semibold text-gray-700 tabular-nums"
-                    >{{
-                      filter.options.filter((opt) => opt.checked).length
-                    }}</span
-                  >
+
                   <ChevronDownIcon
                     class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500"
                     aria-hidden="true"
@@ -253,7 +287,7 @@
                       <input
                         :id="`filter-${filter.id}-${option.value}`"
                         v-model="option.checked"
-                        @change="() => emit('set-filter', filters)"
+                        @change="() => emit('filter-products')"
                         type="checkbox"
                         class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
                       />

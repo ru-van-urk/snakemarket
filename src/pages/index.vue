@@ -1,64 +1,70 @@
 <script setup lang="ts">
-  import { useProducts } from "~/composables/useProducts.js";
+  import { Product, useProducts } from "~/composables/useProducts.js";
   import FilterBar from "~/components/filter-bar.vue";
-  import { Filters } from "~/utils/getProductFilters";
+  import { Sort, getSortedProducts } from "~/utils/getSortedProducts";
+  import { Filters, getFilteredProducts } from "~/utils/getProductFilters";
 
   const { data: products, isError, error, isLoading } = useProducts();
+  const filteredProducts = ref<Product[] | undefined>();
+  const filters = ref<Filters | undefined>();
+  const sortOrder = ref<Sort | undefined>();
 
-  const filteredProducts = ref(products.value);
-  watch(products, () => (filteredProducts.value = products.value));
-
-  const handleFilters = (filters: Filters) => {
-    const activeFilters = filters.map((filter) => ({
-      ...filter,
-      options: filter.options.filter((opt) => opt.checked),
-    }));
-
-    const anOfferIsSelected = activeFilters
-      .find((filter) => filter.id === "offers")
-      ?.options.some((opt) => opt.checked);
-
-    const filtered = products.value?.filter((product) => {
-      const getActive = (id: string) =>
-        activeFilters
-          .find((filter) => filter.id === id)
-          ?.options.map((opt) => opt.value);
-
-      const productBrandId = product.BrandInfo?.BrandID;
-      const productGroupIds = product.WebSubGroups.map(
-        (group) => group.WebSubGroupID
-      );
-      const productOfferIds = product.ProductOffers.map(
-        (offer) => offer.Offer.OfferID
-      );
-
-      const productBrandIsActive = productBrandId
-        ? getActive("brands")?.includes(productBrandId)
-        : undefined;
-
-      const productGroupIsActive = getActive("groups")?.some((activeId) =>
-        productGroupIds.includes(activeId)
-      );
-
-      const productOfferIsActive = getActive("offers")?.some((activeId) =>
-        productOfferIds.includes(activeId)
-      );
-
-      if (anOfferIsSelected && productOfferIsActive) return true;
-
-      if (!anOfferIsSelected && productBrandIsActive && productGroupIsActive)
-        return true;
-    });
-
-    filteredProducts.value = filtered;
+  // Filtering is based on the request products, not the previous filtered products,
+  // Ideally this would make a new request to the server to fetch the latest data.
+  const handleFiltering = () => {
+    if (!products.value || !filters.value) return;
+    filteredProducts.value = getFilteredProducts(products.value, filters.value);
   };
+
+  // Sorting is based on the current filtered data.
+  const handleSorting = (newSortOrder?: Sort) => {
+    if (!filteredProducts.value || !products.value || !filters.value) return;
+
+    // When the new sort order equals null reset it to the initial state
+    if (!newSortOrder) {
+      filteredProducts.value = getFilteredProducts(
+        products.value,
+        filters.value
+      );
+      return;
+    }
+
+    sortOrder.value = newSortOrder;
+    filteredProducts.value = getSortedProducts(
+      filteredProducts.value,
+      newSortOrder
+    );
+  };
+
+  // This watcher is for when a new request is coming in, that way the filters,
+  // and sort orders are preserved
+  watch(products, (newProducts) => {
+    if (!newProducts) return;
+
+    if (!filters.value) filters.value = getProductFilters(newProducts);
+
+    let products = newProducts;
+
+    if (filters.value) {
+      products = getFilteredProducts(products, filters.value);
+    }
+    if (sortOrder.value) {
+      products = getSortedProducts(products, sortOrder.value);
+    }
+
+    filteredProducts.value = products;
+  });
 </script>
 
 <template>
   <span v-if="isLoading">Loading...</span>
   <span v-else-if="isError">Error: {{ (error as Error).message }}</span>
-  <main v-else-if="products">
-    <FilterBar :products="products" @set-filter="handleFilters" />
+  <main v-else-if="products && filters">
+    <FilterBar
+      :filters="filters"
+      @sort-products="handleSorting"
+      @filter-products="handleFiltering"
+    />
     <section>
       <ul>
         <li v-for="product in filteredProducts" :key="product.ProductID">
