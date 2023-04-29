@@ -18,38 +18,40 @@
   } from "@headlessui/vue";
   import { XMarkIcon } from "@heroicons/vue/24/outline";
   import { ChevronDownIcon } from "@heroicons/vue/24/solid";
-  import { Filters } from "~/utils/getProductFilters";
+  import { useNuxtData, useState } from "nuxt/app";
+  import {
+    ProductFilters,
+    getProductFilterOptions,
+  } from "~/utils/getProductFilters";
   import { Sort, SortType } from "~/utils/getSortedProducts";
+  import { cn } from "~/utils/helpers";
+  import { sortTypes } from "~/utils/getSortedProducts";
+  import { Product } from "~/schemas/product";
 
-  const { filters } = defineProps<{
-    filters?: Filters;
-  }>();
+  const open = useState("open", () => false);
 
-  const open = ref(false);
+  const filters = useState<ProductFilters | undefined>("filters", () => {
+    const products = useNuxtData<Product[]>("products").data.value;
+    if (!products) return;
+    return getProductFilterOptions(products);
+  });
 
-  const emit = defineEmits<{
-    (event: "filter-products"): void;
-    (event: "sort-products", sort?: Sort): void;
-  }>();
-
-  const activeSort = ref<Sort | undefined>();
+  const sort = useState<Sort | undefined>("sort");
 
   const handleSort = (type: SortType) => {
     let newSort: Sort | undefined = undefined;
 
-    if (!activeSort.value || activeSort.value.type !== type) {
+    if (!sort.value || sort.value.type !== type) {
       newSort = { type, sortOrder: "ASC" };
     }
-    if (activeSort.value?.sortOrder === "ASC") {
+    if (sort.value?.sortOrder === "ASC") {
       newSort = { type, sortOrder: "DES" };
     }
-    if (activeSort.value?.sortOrder === "DES") {
+    if (sort.value?.sortOrder === "DES") {
       newSort = undefined;
     }
 
-    activeSort.value = newSort;
-
-    emit("sort-products", newSort);
+    sort.value = newSort;
   };
 </script>
 
@@ -160,23 +162,9 @@
     <div
       class="max-w-3xl mx-auto px-4 text-center sm:px-6 lg:max-w-7xl lg:px-8"
     >
-      <div class="py-24">
-        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900">
-          New Arrivals
-        </h1>
-        <p class="mt-4 max-w-3xl mx-auto text-base text-gray-500">
-          Thoughtfully designed objects for the workspace, home, and travel.
-        </p>
-      </div>
-
-      <section
-        aria-labelledby="filter-heading"
-        class="border-t border-gray-200 py-6"
-      >
-        <h2 id="filter-heading" class="sr-only">Product filters</h2>
-
+      <section aria-labelledby="filter-heading" class="py-6 container mx-auto">
         <div class="flex items-center justify-between">
-          <Menu as="div" class="relative z-10 inline-block text-left">
+          <Menu as="div" class="relative inline-block text-left">
             <div>
               <MenuButton
                 class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900"
@@ -198,7 +186,7 @@
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="origin-top-left absolute left-0 z-10 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
               >
                 <div class="py-1">
                   <MenuItem
@@ -222,11 +210,11 @@
                       </p>
 
                       <ChevronDownIcon
-                        v-if="activeSort && option === activeSort.type"
+                        v-if="sort && option === sort.type"
                         :class="
                           cn(
                             'flex-shrink-0 h-5 w-5 text-gray-400 mr-2',
-                            activeSort.sortOrder === 'DES' && 'rotate-180'
+                            sort.sortOrder === 'DES' && 'rotate-180'
                           )
                         "
                         aria-hidden="true"
@@ -252,7 +240,7 @@
               v-for="filter in filters"
               :key="filter.name"
               id="desktop-menu"
-              class="relative z-10 inline-block text-left"
+              class="relative inline-block text-left"
             >
               <div>
                 <PopoverButton

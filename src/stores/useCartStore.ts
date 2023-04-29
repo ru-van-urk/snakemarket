@@ -1,3 +1,4 @@
+import { useState } from "nuxt/app";
 import { defineStore } from "pinia";
 
 type CartItem = {
@@ -6,7 +7,7 @@ type CartItem = {
 };
 
 export const useCartStore = defineStore("cart", () => {
-  const cart = ref<CartItem[]>([]);
+  const cart = useState<CartItem[]>("cart", () => []);
 
   function addToCart(ProductID: number) {
     const isInCart = cart.value.find((item) => item.ProductID === ProductID);

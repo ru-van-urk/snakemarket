@@ -1,10 +1,11 @@
 <script setup lang="ts">
   import { Product, productSchema } from "~/schemas/product";
   import FilterBar from "~/components/filter-bar.vue";
-  import { Sort, getSortedProducts } from "~/utils/getSortedProducts";
-  import { Filters, getFilteredProducts } from "~/utils/getProductFilters";
+  import { getProductOrder } from "~/utils/getSortedProducts";
+  import { getProductFilter } from "~/utils/getProductFilters";
   import { useCartStore } from "~/stores/useCartStore";
   import { z } from "zod";
+  import { useAsyncData, useRuntimeConfig } from "nuxt/app";
 
   const config = useRuntimeConfig();
 
@@ -23,48 +24,7 @@
     }
   );
 
-  const filters = useState<Filters | null>("filters", () => {
-    if (!products.value) return null;
-    return getProductFilters(products.value);
-  });
-
-  const filteredProducts = useState<Product[] | null>(
-    "filtered-products",
-    () => {
-      if (!products.value || !filters.value) return null;
-      return getFilteredProducts(products.value, filters.value);
-    }
-  );
-
-  const sortOrder = ref<Sort>();
   const cart = useCartStore();
-
-  // Filtering is based on the request products, not the previous filtered products,
-  // Ideally this would make a new request to the server to fetch the latest data.
-  const handleFiltering = () => {
-    if (!products.value || !filters.value) return;
-    filteredProducts.value = getFilteredProducts(products.value, filters.value);
-  };
-
-  // Sorting is based on the current filtered data.
-  const handleSorting = (newSortOrder?: Sort) => {
-    if (!filteredProducts.value || !products.value || !filters.value) return;
-
-    // When the new sort order equals null reset it to the initial state
-    if (!newSortOrder) {
-      filteredProducts.value = getFilteredProducts(
-        products.value,
-        filters.value
-      );
-      return;
-    }
-
-    sortOrder.value = newSortOrder;
-    filteredProducts.value = getSortedProducts(
-      filteredProducts.value,
-      newSortOrder
-    );
-  };
 </script>
 
 <template>
@@ -73,16 +33,16 @@
     <span v-else-if="error">Error: {{ error.message }}</span>
 
     <main v-else>
-      <FilterBar
-        v-if="filters"
-        :filters="filters"
-        @sort-products="handleSorting"
-        @filter-products="handleFiltering"
-      />
+      <FilterBar />
 
       <section>
         <ul>
-          <li v-for="product in filteredProducts" :key="product.ProductID">
+          <li
+            v-for="product in products
+              ?.filter(getProductFilter)
+              .sort(getProductOrder)"
+            :key="product.ProductID"
+          >
             <img
               :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
               width="200"

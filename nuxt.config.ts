@@ -9,4 +9,12 @@ export default defineNuxtConfig({
   },
 
   modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
+
+  imports: {
+    autoImport: false,
+  },
+
+  typescript: {
+    typeCheck: true,
+  },
 });
