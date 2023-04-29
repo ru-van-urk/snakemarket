@@ -3,11 +3,21 @@
   import FilterBar from "~/components/filter-bar.vue";
   import { Sort, getSortedProducts } from "~/utils/getSortedProducts";
   import { Filters, getFilteredProducts } from "~/utils/getProductFilters";
+  import { useCartStore } from "~/stores/useCartStore";
 
-  const { data: products, isError, error, isLoading } = useProducts();
-  const filteredProducts = ref<Product[] | undefined>();
-  const filters = ref<Filters | undefined>();
-  const sortOrder = ref<Sort | undefined>();
+  const {
+    data: products,
+    isError,
+    error,
+    isLoading,
+    suspense: prefetchProducts,
+  } = useProducts();
+
+  const filteredProducts = useState<Product[]>("filtered-products");
+  const filters = useState<Filters>("filters");
+  const sortOrder = ref<Sort>();
+
+  const cart = useCartStore();
 
   // Filtering is based on the request products, not the previous filtered products,
   // Ideally this would make a new request to the server to fetch the latest data.
@@ -36,55 +46,61 @@
     );
   };
 
-  // This watcher is for when a new request is coming in, that way the filters,
-  // and sort orders are preserved
-  watch(products, (newProducts) => {
+  onServerPrefetch(async () => {
+    const { data: newProducts } = await prefetchProducts();
+
     if (!newProducts) return;
 
-    if (!filters.value) filters.value = getProductFilters(newProducts);
-
-    let products = newProducts;
-
-    if (filters.value) {
-      products = getFilteredProducts(products, filters.value);
-    }
-    if (sortOrder.value) {
-      products = getSortedProducts(products, sortOrder.value);
-    }
-
-    filteredProducts.value = products;
+    const productFilters = getProductFilters(newProducts);
+    filters.value = productFilters;
+    filteredProducts.value = getFilteredProducts(newProducts, productFilters);
   });
 </script>
 
 <template>
-  <span v-if="isLoading">Loading...</span>
-  <span v-else-if="isError">Error: {{ (error as Error).message }}</span>
-  <main v-else-if="products && filters">
-    <FilterBar
-      :filters="filters"
-      @sort-products="handleSorting"
-      @filter-products="handleFiltering"
-    />
-    <section>
-      <ul>
-        <li v-for="product in filteredProducts" :key="product.ProductID">
-          <img
-            :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
-            width="200"
-          />
-          <h1>{{ product.BrandInfo?.Description }}</h1>
-          <h2>{{ product.MainDescription }}</h2>
-          <p>€{{ product.ProductPrices[0].RegularPrice }}</p>
+  <div>
+    <span v-if="isLoading">Loading...</span>
+    <span v-else-if="isError">Error: {{ (error as Error).message }}</span>
 
-          <span class="quantity-controller">
-            <button class="remove">-</button>
-            <p>0</p>
-            <button class="add">+</button>
-          </span>
-        </li>
-      </ul>
-    </section>
-  </main>
+    <main v-else>
+      <FilterBar
+        :filters="filters"
+        @sort-products="handleSorting"
+        @filter-products="handleFiltering"
+      />
+
+      <section>
+        <ul>
+          <li v-for="product in filteredProducts" :key="product.ProductID">
+            <img
+              :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
+              width="200"
+              alt="Image for {{ product.BrandInfo?.Description }}"
+            />
+            <h2>{{ product.BrandInfo?.Description }}</h2>
+            <h3>{{ product.MainDescription }}</h3>
+            <p>€{{ product.ProductPrices[0].RegularPrice }}</p>
+
+            <span class="quantity-controller">
+              <button
+                class="remove"
+                @click="() => cart.removeFromCart(product.ProductID)"
+              >
+                -
+              </button>
+              <p>{{ cart.getQuantity(product.ProductID) }}</p>
+              <button
+                class="add"
+                @click="() => cart.addToCart(product.ProductID)"
+              >
+                +
+              </button>
+            </span>
+          </li>
+        </ul>
+      </section>
+    </main>
+  </div>
 </template>
 
 <style scoped lang="scss">

@@ -22,7 +22,7 @@
   import { Sort, SortType } from "~/utils/getSortedProducts";
 
   const { filters } = defineProps<{
-    filters: Filters;
+    filters?: Filters;
   }>();
 
   const open = ref(false);
