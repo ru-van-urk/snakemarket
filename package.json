@@ -22,7 +22,6 @@
     "@headlessui/vue": "^1.7.13",
     "@heroicons/vue": "^2.0.17",
     "@pinia/nuxt": "^0.4.9",
-    "@tanstack/vue-query": "^4.29.5",
     "clsx": "^1.2.1",
     "pinia": "^2.0.35",
     "tailwind-merge": "^1.12.0",

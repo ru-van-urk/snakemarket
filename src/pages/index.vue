@@ -1,22 +1,42 @@
 <script setup lang="ts">
-  import { Product, useProducts } from "~/composables/useProducts.js";
+  import { Product, productSchema } from "~/schemas/product";
   import FilterBar from "~/components/filter-bar.vue";
   import { Sort, getSortedProducts } from "~/utils/getSortedProducts";
   import { Filters, getFilteredProducts } from "~/utils/getProductFilters";
   import { useCartStore } from "~/stores/useCartStore";
+  import { z } from "zod";
+
+  const config = useRuntimeConfig();
 
   const {
     data: products,
-    isError,
+    pending,
     error,
-    isLoading,
-    suspense: prefetchProducts,
-  } = useProducts();
+  } = await useAsyncData<Product[]>(
+    "products",
+    () =>
+      $fetch("https://api.dekamarkt.nl/v1/assortmentcache/group/281/104", {
+        query: { api_key: config.public.dekaApiKey },
+      }),
+    {
+      transform: (products) => z.array(productSchema).parse(products),
+    }
+  );
 
-  const filteredProducts = useState<Product[]>("filtered-products");
-  const filters = useState<Filters>("filters");
+  const filters = useState<Filters | null>("filters", () => {
+    if (!products.value) return null;
+    return getProductFilters(products.value);
+  });
+
+  const filteredProducts = useState<Product[] | null>(
+    "filtered-products",
+    () => {
+      if (!products.value || !filters.value) return null;
+      return getFilteredProducts(products.value, filters.value);
+    }
+  );
+
   const sortOrder = ref<Sort>();
-
   const cart = useCartStore();
 
   // Filtering is based on the request products, not the previous filtered products,
@@ -45,25 +65,16 @@
       newSortOrder
     );
   };
-
-  onServerPrefetch(async () => {
-    const { data: newProducts } = await prefetchProducts();
-
-    if (!newProducts) return;
-
-    const productFilters = getProductFilters(newProducts);
-    filters.value = productFilters;
-    filteredProducts.value = getFilteredProducts(newProducts, productFilters);
-  });
 </script>
 
 <template>
   <div>
-    <span v-if="isLoading">Loading...</span>
-    <span v-else-if="isError">Error: {{ (error as Error).message }}</span>
+    <span v-if="pending">Loading...</span>
+    <span v-else-if="error">Error: {{ error.message }}</span>
 
     <main v-else>
       <FilterBar
+        v-if="filters"
         :filters="filters"
         @sort-products="handleSorting"
         @filter-products="handleFiltering"

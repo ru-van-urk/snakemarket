@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/vue-query";
 import { z } from "zod";
 
-const productSchema = z.object({
+export const productSchema = z.object({
   ProductID: z.number(),
   MainDescription: z.string(),
   BrandInfo: z
@@ -31,17 +30,3 @@ const productSchema = z.object({
 });
 
 export type Product = z.infer<typeof productSchema>;
-
-export const useProducts = () => {
-  const config = useRuntimeConfig();
-
-  return useQuery({
-    queryKey: ["DekaProducts"],
-    queryFn: () =>
-      fetch(
-        `https://api.dekamarkt.nl/v1/assortmentcache/group/281/104?api_key=${config.public.dekaApiKey}`
-      )
-        .then((res) => res.json())
-        .then((val) => z.array(productSchema).parse(val)),
-  });
-};

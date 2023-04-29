@@ -1,4 +1,4 @@
-import { Product } from "~/composables/useProducts";
+import { Product } from "~/schemas/product";
 
 export const getProductFilters = (products: Product[]) => {
   const uniqueBrands = products
