@@ -18,41 +18,16 @@
   } from "@headlessui/vue";
   import { XMarkIcon } from "@heroicons/vue/24/outline";
   import { ChevronDownIcon } from "@heroicons/vue/24/solid";
-  import { useNuxtData, useState } from "nuxt/app";
-  import {
-    ProductFilters,
-    getProductFilterOptions,
-  } from "~/utils/getProductFilters";
-  import { Sort, SortType } from "~/utils/getSortedProducts";
+  import { useState } from "nuxt/app";
   import { cn } from "~/utils/helpers";
-  import { sortTypes } from "~/utils/getSortedProducts";
-  import { Product } from "~/schemas/product";
+  import useFilters from "~/composables/useFilters";
+  import useSort from "~/composables/useSort";
+  import { sortTypes } from "~/composables/useSort";
 
   const open = useState("open", () => false);
 
-  const filters = useState<ProductFilters | undefined>("filters", () => {
-    const products = useNuxtData<Product[]>("products").data.value;
-    if (!products) return;
-    return getProductFilterOptions(products);
-  });
-
-  const sort = useState<Sort | undefined>("sort");
-
-  const handleSort = (type: SortType) => {
-    let newSort: Sort | undefined = undefined;
-
-    if (!sort.value || sort.value.type !== type) {
-      newSort = { type, sortOrder: "ASC" };
-    }
-    if (sort.value?.sortOrder === "ASC") {
-      newSort = { type, sortOrder: "DES" };
-    }
-    if (sort.value?.sortOrder === "DES") {
-      newSort = undefined;
-    }
-
-    sort.value = newSort;
-  };
+  const filters = useFilters();
+  const [sort, setSort] = useSort();
 </script>
 
 <template>
@@ -139,7 +114,6 @@
                       <input
                         :id="`filter-mobile-${section.id}-${optionIdx}`"
                         v-model="option.checked"
-                        @change="() => emit('filter-products')"
                         type="checkbox"
                         class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
                       />
@@ -195,7 +169,7 @@
                     v-slot="{ active }"
                   >
                     <span
-                      @click="() => handleSort(option)"
+                      @click="() => setSort(option)"
                       :class="
                         cn(
                           'flex w-full justify-between items-center',
@@ -275,7 +249,6 @@
                       <input
                         :id="`filter-${filter.id}-${option.value}`"
                         v-model="option.checked"
-                        @change="() => emit('filter-products')"
                         type="checkbox"
                         class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
                       />

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-  import { Product, productSchema } from "~/schemas/product";
+  import { productSchema } from "~/schemas/product";
   import FilterBar from "~/components/filter-bar.vue";
-  import { getProductOrder } from "~/utils/getSortedProducts";
-  import { getProductFilter } from "~/utils/getProductFilters";
+  import { productSort } from "~/utils/productSort";
+  import { productFilter } from "~/utils/getProductFilters";
   import { useCartStore } from "~/stores/useCartStore";
   import { z } from "zod";
   import { useAsyncData, useRuntimeConfig } from "nuxt/app";
@@ -13,14 +13,14 @@
     data: products,
     pending,
     error,
-  } = await useAsyncData<Product[]>(
+  } = await useAsyncData(
     "products",
     () =>
       $fetch("https://api.dekamarkt.nl/v1/assortmentcache/group/281/104", {
         query: { api_key: config.public.dekaApiKey },
       }),
     {
-      transform: (products) => z.array(productSchema).parse(products),
+      transform: (res) => z.array(productSchema).parse(res),
     }
   );
 
@@ -32,15 +32,13 @@
     <span v-if="pending">Loading...</span>
     <span v-else-if="error">Error: {{ error.message }}</span>
 
-    <main v-else>
+    <main v-else-if="products">
       <FilterBar />
 
       <section>
         <ul>
           <li
-            v-for="product in products
-              ?.filter(getProductFilter)
-              .sort(getProductOrder)"
+            v-for="product in products.filter(productFilter).sort(productSort)"
             :key="product.ProductID"
           >
             <img

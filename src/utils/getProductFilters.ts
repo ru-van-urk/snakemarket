@@ -1,4 +1,4 @@
-import { useState } from "nuxt/app";
+import useFilters from "~/composables/useFilters";
 import { Product } from "~/schemas/product";
 
 export const getProductFilterOptions = (products: Product[]) => {
@@ -66,10 +66,10 @@ export const getProductFilterOptions = (products: Product[]) => {
 export type FilterId = "brands" | "groups" | "offers";
 export type ProductFilters = ReturnType<typeof getProductFilterOptions>;
 
-export const getProductFilter = (product: Product) => {
-  const filters = useState<ProductFilters>("filters").value;
+export const productFilter = (product: Product) => {
+  const filters = useFilters().value;
 
-  console.log({ filters });
+  if (!filters) return false;
 
   const activeFilters = filters.map((filter) => ({
     ...filter,
