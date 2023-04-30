@@ -133,9 +133,7 @@
       </Dialog>
     </TransitionRoot>
 
-    <div
-      class="max-w-3xl mx-auto px-4 text-center sm:px-6 lg:max-w-7xl lg:px-8"
-    >
+    <div class="mx-auto text-center px-4 sm:px-6 lg:px-8">
       <section aria-labelledby="filter-heading" class="py-6 container mx-auto">
         <div class="flex items-center justify-between">
           <Menu as="div" class="relative inline-block text-left">
@@ -160,25 +158,16 @@
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hover:bg-red-100 group"
               >
-                <div class="py-1">
-                  <MenuItem
-                    v-for="option in sortTypes"
-                    :key="option"
-                    v-slot="{ active }"
-                  >
+                <div class="py-1 cursor-pointer">
+                  <MenuItem v-for="option in sortTypes" :key="option">
                     <span
                       @click="() => setSort(option)"
-                      :class="
-                        cn(
-                          'flex w-full justify-between items-center',
-                          active ? 'bg-gray-100' : ''
-                        )
-                      "
+                      class="flex w-full justify-between items-center"
                     >
                       <p
-                        class="'block px-4 py-2 text-sm font-medium text-gray-900'"
+                        class="block px-4 py-2 text-sm font-medium text-gray-900 group-hover:text-slate-600"
                       >
                         {{ option }}
                       </p>
@@ -238,7 +227,7 @@
                 leave-to-class="transform opacity-0 scale-95"
               >
                 <PopoverPanel
-                  class="origin-top-right absolute right-0 mt-2 bg-white rounded-md shadow-2xl p-4 ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  class="origin-top-right absolute right-0 mt-2 bg-white rounded-md shadow-2xl p-4 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
                 >
                   <div class="space-y-4" v-if="filter.options.length > 0">
                     <div
@@ -250,11 +239,11 @@
                         :id="`filter-${filter.id}-${option.value}`"
                         v-model="option.checked"
                         type="checkbox"
-                        class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500 cursor-pointer"
                       />
                       <label
                         :for="`filter-${filter.id}-${option.value}`"
-                        class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap"
+                        class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap cursor-pointer"
                       >
                         {{ option.label }}
                       </label>
