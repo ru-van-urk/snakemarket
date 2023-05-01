@@ -5,6 +5,6 @@
 <template>
   <NuxtLayout>
     <Header />
-    <NuxtPage class="pt-16 bg-gray-50" />
+    <NuxtPage class="pt-16" />
   </NuxtLayout>
 </template>

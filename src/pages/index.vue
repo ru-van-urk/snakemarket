@@ -34,7 +34,7 @@
     <main v-else-if="products">
       <FilterBar />
 
-      <section class="flex flex-wrap justify-center container mx-auto">
+      <section class="flex flex-wrap container mx-auto">
         <ProductCard
           v-for="product in products.filter(productFilter).sort(productSort)"
           :product="product"

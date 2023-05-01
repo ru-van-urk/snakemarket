@@ -2,12 +2,61 @@
   import { Product } from "~/schemas/product";
   import { useCartStore } from "~/stores/useCartStore";
   import { cn } from "~/utils/helpers";
+  import { ref } from "vue";
+  import { useState } from "nuxt/app";
 
   const { product } = defineProps<{ product: Product }>();
 
-  const cart = useCartStore();
+  const cartStore = useCartStore();
 
-  const log = () => console.log("hey");
+  const imageRef = ref();
+  const cartRef = useState<HTMLSpanElement>("cartRef");
+
+  const addToCart = () => {
+    cartStore.addToCart(product.ProductID);
+
+    const imgToDrag = imageRef.value;
+    const cart = cartRef.value;
+
+    if (imgToDrag && cart) {
+      const imgClone = imgToDrag.cloneNode();
+      imgClone.style.position = "absolute";
+      imgClone.style.zIndex = "100";
+      imgToDrag.insertAdjacentElement("afterend", imgClone);
+
+      const {
+        x: cartX,
+        y: cartY,
+        width: cartWidth,
+        height: cartHeight,
+      } = cart.getBoundingClientRect();
+      const { x: imgX, y: imgY } = imgClone.getBoundingClientRect();
+
+      const translate = {
+        x: `${cartX - imgX - cartWidth * 2}px`,
+        y: `${cartY - imgY - cartHeight * 2}px`,
+      };
+
+      imgClone.animate(
+        [
+          {
+            transform: `translate(0)`,
+            width: `${imgClone.width}px`,
+            height: `${imgClone.height}px`,
+          },
+          {
+            transform: `translate(${translate.x}, ${translate.y})`,
+            width: "10px",
+            height: "10px",
+          },
+        ],
+        1000,
+        "ease-in-out"
+      ).onfinish = function () {
+        imgClone.remove();
+      };
+    }
+  };
 </script>
 
 <template>
@@ -15,14 +64,13 @@
     :class="cn('group border rounded m-4  shadow bg-white', 'w-2/5 sm:w-56')"
   >
     <div
-      class="p-4 flex items-center justify-center border-b cursor-pointer"
-      @click="() => log()"
+      class="p-4 flex items-center justify-center border-b cursor-pointer relative"
     >
       <img
+        ref="imageRef"
         :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
-        width="150"
         alt="Image for {{ product.BrandInfo?.Description }}"
-        :class="'hover:scale-105 transition'"
+        :class="'hover:scale-105 transition w-[150px]'"
       />
     </div>
 
@@ -42,19 +90,19 @@
       </p>
 
       <span
-        v-if="cart.getQuantity(product.ProductID) > 0"
+        v-if="cartStore.getQuantity(product.ProductID) > 0"
         class="w-full flex justify-between"
       >
         <button
           class="py-2 px-4 bg-red-600 rounded text-white"
-          @click="() => cart.removeFromCart(product.ProductID)"
+          @click="() => cartStore.removeFromCart(product.ProductID)"
         >
           -
         </button>
-        <p class="py-2 px-4">{{ cart.getQuantity(product.ProductID) }}</p>
+        <p class="py-2 px-4">{{ cartStore.getQuantity(product.ProductID) }}</p>
         <button
           class="py-2 px-4 bg-red-600 rounded text-white"
-          @click="() => cart.addToCart(product.ProductID)"
+          @click="() => cartStore.addToCart(product.ProductID)"
         >
           +
         </button>
@@ -69,7 +117,7 @@
               'text-sm sm:text-base'
             )
           "
-          @click="() => cart.addToCart(product.ProductID)"
+          @click="addToCart"
         >
           In winkelwagen
         </button>
