@@ -14,9 +14,7 @@ export default defineNuxtConfig({
     autoImport: false,
   },
 
-  // typescript: {
-  //   typeCheck: true,
-  // },
-
-  tailwindcss: {},
+  typescript: {
+    typeCheck: true,
+  },
 });

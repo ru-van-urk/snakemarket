@@ -109,17 +109,17 @@
                     <div
                       v-for="(option, optionIdx) in section.options"
                       :key="option.value"
-                      class="flex items-center"
+                      class="flex items-center z-10"
                     >
                       <input
                         :id="`filter-mobile-${section.id}-${optionIdx}`"
                         v-model="option.checked"
                         type="checkbox"
-                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500 cursor-pointer"
+                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500 cursor-pointer select-none"
                       />
                       <label
                         :for="`filter-mobile-${section.id}-${optionIdx}`"
-                        class="ml-3 text-sm text-gray-500 cursor-pointer"
+                        class="ml-3 text-sm text-gray-500 cursor-pointer select-none"
                       >
                         {{ option.label }}
                       </label>
@@ -159,9 +159,9 @@
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hover:bg-gray-50 group"
+                class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hover:bg-gray-50 group z-20"
               >
-                <div class="py-1 cursor-pointer">
+                <div class="py-1 cursor-pointer select-none">
                   <MenuItem v-for="option in sortTypes" :key="option">
                     <span
                       @click="() => setSort(option)"
@@ -240,11 +240,11 @@
                         :id="`filter-${filter.id}-${option.value}`"
                         v-model="option.checked"
                         type="checkbox"
-                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500 cursor-pointer"
+                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500 cursor-pointer select-none"
                       />
                       <label
                         :for="`filter-${filter.id}-${option.value}`"
-                        class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap cursor-pointer"
+                        class="ml-3 pr-6 text-sm font-medium text-gray-900 whitespace-nowrap cursor-pointer select-none"
                       >
                         {{ option.label }}
                       </label>
