@@ -36,7 +36,7 @@
         <img
           ref="imageRef"
           :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
-          alt="Image for {{ product.BrandInfo?.Description }}"
+          :alt="`Productfoto voor ${product.MainDescription}`"
           :class="'hover:scale-105 transition w-[150px]'"
         />
       </div>

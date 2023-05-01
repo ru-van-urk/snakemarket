@@ -31,7 +31,7 @@
 </script>
 
 <template>
-  <div class="bg-gray-50 container mx-auto">
+  <div>
     <!-- Mobile filter dialog -->
     <TransitionRoot as="template" :show="open">
       <Dialog
@@ -96,7 +96,7 @@
                         :class="
                           cn(
                             open ? '-rotate-180' : 'rotate-0',
-                            'h-5 w-5 transform'
+                            'h-5 w-5 transform '
                           )
                         "
                         aria-hidden="true"
@@ -135,7 +135,7 @@
     </TransitionRoot>
 
     <div class="mx-auto text-center">
-      <section aria-labelledby="filter-heading" class="py-6 container mx-auto">
+      <section aria-labelledby="filter-heading" class="py-6">
         <div class="flex items-center justify-between">
           <Menu as="div" class="relative inline-block text-left">
             <div>
@@ -144,7 +144,7 @@
               >
                 Sorteer op
                 <ChevronDownIcon
-                  class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                  class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-red-600"
                   aria-hidden="true"
                 />
               </MenuButton>
@@ -213,7 +213,7 @@
                   <span>{{ filter.name }}</span>
 
                   <ChevronDownIcon
-                    class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                    class="flex-shrink-0 -mr-1 ml-1 h-5 w-5 text-red-600"
                     aria-hidden="true"
                   />
                 </PopoverButton>

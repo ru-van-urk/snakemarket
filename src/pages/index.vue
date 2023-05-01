@@ -1,17 +1,19 @@
 <script setup lang="ts">
-  import { productSchema } from "~/schemas/product";
   import FilterBar from "~/components/filter-bar.vue";
-  import { z } from "zod";
-  import { useAsyncData, useRuntimeConfig } from "nuxt/app";
   import ProductCard from "~/components/product-card.vue";
   import useSort from "~/composables/useSort";
   import useFilters from "~/composables/useFilters";
   import useProducts from "~/composables/useProducts";
+  import { useHead } from "nuxt/app";
 
   const { data: products, pending, error } = await useProducts();
 
   const { sortFn } = useSort();
   const { filterFn } = useFilters();
+
+  useHead({
+    title: `Snake 🛒 Markt - Overzicht`,
+  });
 </script>
 
 <template>
