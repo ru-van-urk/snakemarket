@@ -4,58 +4,26 @@
   import { cn } from "~/utils/helpers";
   import { ref } from "vue";
   import { useState } from "nuxt/app";
+  import { animateCart } from "~/utils/animateCart";
 
   const { product } = defineProps<{ product: Product }>();
 
   const cartStore = useCartStore();
 
-  const imageRef = ref();
+  const imageRef = ref<HTMLImageElement>();
   const cartRef = useState<HTMLSpanElement>("cartRef");
 
   const addToCart = () => {
     cartStore.addToCart(product.ProductID);
+    animateCart("to-cart", imageRef.value, cartRef.value);
+  };
 
-    const imgToDrag = imageRef.value;
-    const cart = cartRef.value;
-
-    if (imgToDrag && cart) {
-      const imgClone = imgToDrag.cloneNode();
-      imgClone.style.position = "absolute";
-      imgClone.style.zIndex = "100";
-      imgToDrag.insertAdjacentElement("afterend", imgClone);
-
-      const {
-        x: cartX,
-        y: cartY,
-        width: cartWidth,
-        height: cartHeight,
-      } = cart.getBoundingClientRect();
-      const { x: imgX, y: imgY } = imgClone.getBoundingClientRect();
-
-      const translate = {
-        x: `${cartX - imgX - cartWidth * 2}px`,
-        y: `${cartY - imgY - cartHeight * 2}px`,
-      };
-
-      imgClone.animate(
-        [
-          {
-            transform: `translate(0)`,
-            width: `${imgClone.width}px`,
-            height: `${imgClone.height}px`,
-          },
-          {
-            transform: `translate(${translate.x}, ${translate.y})`,
-            width: "10px",
-            height: "10px",
-          },
-        ],
-        1000,
-        "ease-in-out"
-      ).onfinish = function () {
-        imgClone.remove();
-      };
+  const removeFromCart = () => {
+    if (cartStore.getQuantity(product.ProductID) === 1) {
+      animateCart("from-cart", imageRef.value, cartRef.value);
     }
+
+    cartStore.removeFromCart(product.ProductID);
   };
 </script>
 
@@ -95,7 +63,7 @@
       >
         <button
           class="py-2 px-4 bg-red-600 rounded text-white"
-          @click="() => cartStore.removeFromCart(product.ProductID)"
+          @click="removeFromCart"
         >
           -
         </button>
