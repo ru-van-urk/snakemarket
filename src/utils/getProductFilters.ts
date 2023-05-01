@@ -13,7 +13,7 @@ export const getProductFilterOptions = (products: Product[]) => {
     .map((brand) => ({
       value: brand.BrandID,
       label: brand.Description,
-      checked: true,
+      checked: false,
     }));
 
   const uniqueWebSubGroups = products
@@ -28,7 +28,7 @@ export const getProductFilterOptions = (products: Product[]) => {
     .map((group) => ({
       value: group.WebSubGroupID,
       label: group.Description,
-      checked: true,
+      checked: false,
     }));
 
   const uniqueOffers = products
@@ -67,18 +67,19 @@ export type FilterId = "brands" | "groups" | "offers";
 export type ProductFilters = ReturnType<typeof getProductFilterOptions>;
 
 export const productFilter = (product: Product) => {
-  const filters = useFilters().value;
+  const filters = useFilters();
 
   if (!filters) return false;
 
-  const activeFilters = filters.map((filter) => ({
+  const activeFilters = filters.value.map((filter) => ({
     ...filter,
     options: filter.options.filter((opt) => opt.checked),
   }));
 
-  const anOfferIsSelected = activeFilters
-    .find((filter) => filter.id === "offers")
-    ?.options.some((opt) => opt.checked);
+  // When no filters are active show all the products
+  if (activeFilters.every((filter) => filter.options.length === 0)) {
+    return true;
+  }
 
   const getActive = (id: FilterId) =>
     activeFilters
@@ -105,8 +106,6 @@ export const productFilter = (product: Product) => {
     productOfferIds.includes(activeId)
   );
 
-  if (anOfferIsSelected && productOfferIsActive) return true;
-
-  if (!anOfferIsSelected && productBrandIsActive && productGroupIsActive)
+  if (productBrandIsActive || productOfferIsActive || productGroupIsActive)
     return true;
 };
