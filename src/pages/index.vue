@@ -1,12 +1,11 @@
 <script setup lang="ts">
   import { productSchema } from "~/schemas/product";
   import FilterBar from "~/components/filter-bar.vue";
-  import { productSort } from "~/utils/productSort";
   import { productFilter } from "~/utils/getProductFilters";
-  import { useCartStore } from "~/stores/useCartStore";
   import { z } from "zod";
   import { useAsyncData, useRuntimeConfig } from "nuxt/app";
   import ProductCard from "~/components/product-card.vue";
+  import useSort from "~/composables/useSort";
 
   const config = useRuntimeConfig();
 
@@ -24,6 +23,8 @@
       transform: (res) => z.array(productSchema).parse(res),
     }
   );
+
+  const [productSort] = useSort();
 </script>
 
 <template>

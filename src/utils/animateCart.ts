@@ -22,42 +22,20 @@ export const animateCart = (
       y: `${cartY - imgY - cartHeight * 2}px`,
     };
 
-    const keyFrames: Keyframe[] = [];
+    const keyFrames: Keyframe[] = [
+      {
+        transform: `translate(0)`,
+        width: `${imgClone.width}px`,
+        height: `${imgClone.height}px`,
+      },
+      {
+        transform: `translate(${translate.x}, ${translate.y})`,
+        width: "10px",
+        height: "10px",
+      },
+    ];
 
-    if (animateType === "to-cart") {
-      keyFrames.push(
-        {
-          transform: `translate(0)`,
-          width: `${imgClone.width}px`,
-          height: `${imgClone.height}px`,
-        },
-        {
-          transform: `translate(${translate.x}, ${translate.y})`,
-          width: "10px",
-          height: "10px",
-        }
-      );
-    }
-
-    if (animateType === "from-cart") {
-      const imgCoords = {
-        x: imgX + "px",
-        y: imgY + "px",
-      };
-
-      keyFrames.push(
-        {
-          transform: `translate(${translate.x}, ${translate.y})`,
-          width: "10px",
-          height: "10px",
-        },
-        {
-          transform: `translate(${imgCoords.x}, ${imgCoords.y}px)`,
-          width: `${imgClone.width}px`,
-          height: `${imgClone.height}px`,
-        }
-      );
-    }
+    if (animateType === "from-cart") keyFrames.reverse();
 
     imgClone.animate(keyFrames, {
       duration: 1000,
