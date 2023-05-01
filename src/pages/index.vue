@@ -1,11 +1,11 @@
 <script setup lang="ts">
   import { productSchema } from "~/schemas/product";
   import FilterBar from "~/components/filter-bar.vue";
-  import { productFilter } from "~/utils/getProductFilters";
   import { z } from "zod";
   import { useAsyncData, useRuntimeConfig } from "nuxt/app";
   import ProductCard from "~/components/product-card.vue";
   import useSort from "~/composables/useSort";
+  import useFilters from "~/composables/useFilters";
 
   const config = useRuntimeConfig();
 
@@ -24,7 +24,8 @@
     }
   );
 
-  const [productSort] = useSort();
+  const { sortFn } = useSort();
+  const { filterFn } = useFilters();
 </script>
 
 <template>
@@ -35,11 +36,9 @@
     <main v-else-if="products">
       <FilterBar />
 
-      <section
-        class="flex flex-wrap container mx-auto justify-center md:justify-start"
-      >
+      <section class="flex flex-wrap justify-start container mx-auto">
         <ProductCard
-          v-for="product in products.filter(productFilter).sort(productSort)"
+          v-for="product in products.filter(filterFn).sort(sortFn)"
           :key="product.ProductID"
           :product="product"
         />

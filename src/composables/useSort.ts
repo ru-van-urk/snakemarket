@@ -8,16 +8,16 @@ export type SortOrder = "ASC" | "DES";
 export type Sort = { type: SortType; sortOrder: SortOrder };
 
 const useSort = () => {
-  const sort = useState<Sort | undefined>("sort");
+  const activeSort = useState<Sort | undefined>("sort");
 
-  const getSort = (a: Product, b: Product) => {
-    if (!sort.value) return 0;
+  const sortFn = (a: Product, b: Product) => {
+    if (!activeSort.value) return 0;
 
-    if (sort.value?.type === "Prijs") {
+    if (activeSort.value?.type === "Prijs") {
       const priceA = a.ProductPrices[0].RegularPrice;
       const priceB = b.ProductPrices[0].RegularPrice;
 
-      return sort.value?.sortOrder === "ASC"
+      return activeSort.value?.sortOrder === "ASC"
         ? priceA - priceB
         : priceB - priceA;
     }
@@ -28,20 +28,20 @@ const useSort = () => {
   const setSort = (type: SortType) => {
     let newSort: Sort | undefined = undefined;
 
-    if (!sort.value || sort.value.type !== type) {
+    if (!activeSort.value || activeSort.value.type !== type) {
       newSort = { type, sortOrder: "ASC" };
     }
-    if (sort.value?.sortOrder === "ASC") {
+    if (activeSort.value?.sortOrder === "ASC") {
       newSort = { type, sortOrder: "DES" };
     }
-    if (sort.value?.sortOrder === "DES") {
+    if (activeSort.value?.sortOrder === "DES") {
       newSort = undefined;
     }
 
-    sort.value = newSort;
+    activeSort.value = newSort;
   };
 
-  return [getSort, setSort] as const;
+  return { activeSort, setSort, sortFn } as const;
 };
 
 export default useSort;

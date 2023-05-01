@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import { ShoppingBagIcon } from "@heroicons/vue/24/solid";
   import { useState } from "nuxt/app";
-  import { useCartStore } from "~/stores/useCartStore";
+  import useCart from "~/composables/useCart";
 
-  const cartStore = useCartStore();
+  const cartStore = useCart();
 
   const cartRef = useState("cartRef");
 </script>
@@ -17,7 +17,7 @@
 
       <span class="flex gap-2" ref="cartRef">
         <ShoppingBagIcon class="h-5 w-5 text-red-600" />
-        <p>{{ cartStore.cart.length }}</p>
+        <p>{{ cartStore.cart.value.length }}</p>
       </span>
     </span>
   </header>

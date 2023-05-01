@@ -21,13 +21,13 @@
   import { useState } from "nuxt/app";
   import { cn } from "~/utils/helpers";
   import useFilters from "~/composables/useFilters";
-  import useSort from "~/composables/useSort";
+  import useSort, { Sort } from "~/composables/useSort";
   import { sortTypes } from "~/composables/useSort";
 
   const open = useState("open", () => false);
 
-  const filters = useFilters();
-  const [sort, setSort] = useSort();
+  const { activeFilters } = useFilters();
+  const { activeSort, setSort } = useSort();
 </script>
 
 <template>
@@ -79,7 +79,7 @@
             <form class="mt-4">
               <Disclosure
                 as="div"
-                v-for="section in filters"
+                v-for="section in activeFilters"
                 :key="section.name"
                 class="border-t border-gray-200 px-4 py-6"
                 v-slot="{ open }"
@@ -115,7 +115,7 @@
                         :id="`filter-mobile-${section.id}-${optionIdx}`"
                         v-model="option.checked"
                         type="checkbox"
-                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500"
+                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500 cursor-pointer"
                       />
                       <label
                         :for="`filter-mobile-${section.id}-${optionIdx}`"
@@ -159,7 +159,7 @@
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hover:bg-red-100 group"
+                class="origin-top-left absolute left-0 mt-2 w-40 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hover:bg-gray-50 group"
               >
                 <div class="py-1 cursor-pointer">
                   <MenuItem v-for="option in sortTypes" :key="option">
@@ -174,11 +174,11 @@
                       </p>
 
                       <ChevronDownIcon
-                        v-if="sort && option === sort.type"
+                        v-if="activeSort && option === activeSort.type"
                         :class="
                           cn(
                             'flex-shrink-0 h-5 w-5 text-gray-400 mr-2',
-                            sort.sortOrder === 'DES' && 'rotate-180'
+                            activeSort.sortOrder === 'DES' && 'rotate-180'
                           )
                         "
                         aria-hidden="true"
@@ -201,7 +201,7 @@
           <PopoverGroup class="hidden sm:flex sm:items-baseline sm:space-x-8">
             <Popover
               as="div"
-              v-for="filter in filters"
+              v-for="filter in activeFilters"
               :key="filter.name"
               id="desktop-menu"
               class="relative inline-block text-left"

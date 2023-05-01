@@ -1,12 +1,11 @@
 import { useState } from "nuxt/app";
-import { defineStore } from "pinia";
 
 type CartItem = {
   ProductID: number;
   quantity: number;
 };
 
-export const useCartStore = defineStore("cart", () => {
+const useCart = () => {
   const cart = useState<CartItem[]>("cart", () => []);
 
   function addToCart(ProductID: number) {
@@ -47,4 +46,6 @@ export const useCartStore = defineStore("cart", () => {
   }
 
   return { cart, addToCart, removeFromCart, getQuantity };
-});
+};
+
+export default useCart;

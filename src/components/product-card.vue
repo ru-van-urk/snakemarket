@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { Product } from "~/schemas/product";
-  import { useCartStore } from "~/stores/useCartStore";
+  import useCart from "~/composables/useCart";
   import { cn } from "~/utils/helpers";
   import { ref } from "vue";
   import { useState } from "nuxt/app";
@@ -8,7 +8,7 @@
 
   const { product } = defineProps<{ product: Product }>();
 
-  const cartStore = useCartStore();
+  const cartStore = useCart();
 
   const imageRef = ref<HTMLImageElement>();
   const cartRef = useState<HTMLSpanElement>("cartRef");
@@ -45,16 +45,16 @@
     <div class="p-4 flex flex-col gap-3 w-full">
       <span>
         <h3 class="font-light text-sm">
-          {{ product.BrandInfo?.Description }}
+          {{ product.BrandInfo?.Description ?? "&nbsp;" }}
         </h3>
 
         <h2 class="font-bold truncate hover:text-clip">
-          {{ product.MainDescription }}
+          {{ product.MainDescription ?? "&nbsp;" }}
         </h2>
       </span>
 
       <p class="font-semibold text-xs p">
-        €{{ product.ProductPrices[0].RegularPrice }} per stuk
+        €{{ product.ProductPrices[0].RegularPrice ?? "&nbsp;" }} per stuk
       </p>
 
       <span
