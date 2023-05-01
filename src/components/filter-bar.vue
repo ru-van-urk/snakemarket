@@ -67,7 +67,7 @@
               <h2 class="text-lg font-medium text-gray-900">Filters</h2>
               <button
                 type="button"
-                class="-mr-2 w-10 h-10 bg-white p-2 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="-mr-2 w-10 h-10 bg-white p-2 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                 @click="open = false"
               >
                 <span class="sr-only">Close menu</span>
@@ -105,7 +105,7 @@
                   </DisclosureButton>
                 </h3>
                 <DisclosurePanel class="pt-6">
-                  <div class="space-y-6">
+                  <div class="space-y-6" v-if="section.options.length">
                     <div
                       v-for="(option, optionIdx) in section.options"
                       :key="option.value"
@@ -115,16 +115,17 @@
                         :id="`filter-mobile-${section.id}-${optionIdx}`"
                         v-model="option.checked"
                         type="checkbox"
-                        class="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                        class="h-4 w-4 border-gray-300 rounded text-red-600 focus:ring-red-500"
                       />
                       <label
                         :for="`filter-mobile-${section.id}-${optionIdx}`"
-                        class="ml-3 text-sm text-gray-500"
+                        class="ml-3 text-sm text-gray-500 cursor-pointer"
                       >
                         {{ option.label }}
                       </label>
                     </div>
                   </div>
+                  <div v-else>Er zijn geen aanbiedingen deze week</div>
                 </DisclosurePanel>
               </Disclosure>
             </form>
