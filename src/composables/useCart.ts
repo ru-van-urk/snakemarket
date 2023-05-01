@@ -8,7 +8,7 @@ type CartItem = {
 const useCart = () => {
   const cart = useState<CartItem[]>("cart", () => []);
 
-  function addToCart(ProductID: number) {
+  const addToCart = (ProductID: number) => {
     const isInCart = cart.value.find((item) => item.ProductID === ProductID);
 
     let newCart = [...cart.value, { ProductID, quantity: 1 }];
@@ -21,9 +21,9 @@ const useCart = () => {
     }
 
     cart.value = newCart;
-  }
+  };
 
-  function removeFromCart(ProductID: number) {
+  const removeFromCart = (ProductID: number) => {
     const isInCart = cart.value.find((item) => item.ProductID === ProductID);
 
     if (!isInCart) return;
@@ -38,12 +38,12 @@ const useCart = () => {
     }
 
     cart.value = newCart;
-  }
+  };
 
-  function getQuantity(ProductID: number) {
+  const getQuantity = (ProductID: number) => {
     const cartItem = cart.value.find((item) => item.ProductID === ProductID);
     return cartItem ? cartItem.quantity : 0;
-  }
+  };
 
   return { cart, addToCart, removeFromCart, getQuantity };
 };
