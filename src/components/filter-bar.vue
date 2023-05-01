@@ -31,7 +31,7 @@
 </script>
 
 <template>
-  <div class="bg-gray-50">
+  <div class="bg-gray-50 container mx-auto">
     <!-- Mobile filter dialog -->
     <TransitionRoot as="template" :show="open">
       <Dialog
@@ -134,7 +134,7 @@
       </Dialog>
     </TransitionRoot>
 
-    <div class="mx-auto text-center px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto text-center">
       <section aria-labelledby="filter-heading" class="py-6 container mx-auto">
         <div class="flex items-center justify-between">
           <Menu as="div" class="relative inline-block text-left">

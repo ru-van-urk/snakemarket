@@ -6,23 +6,9 @@
   import ProductCard from "~/components/product-card.vue";
   import useSort from "~/composables/useSort";
   import useFilters from "~/composables/useFilters";
+  import useProducts from "~/composables/useProducts";
 
-  const config = useRuntimeConfig();
-
-  const {
-    data: products,
-    pending,
-    error,
-  } = await useAsyncData(
-    "products",
-    () =>
-      $fetch("https://api.dekamarkt.nl/v1/assortmentcache/group/281/104", {
-        query: { api_key: config.public.dekaApiKey },
-      }),
-    {
-      transform: (res) => z.array(productSchema).parse(res),
-    }
-  );
+  const { data: products, pending, error } = await useProducts();
 
   const { sortFn } = useSort();
   const { filterFn } = useFilters();
@@ -30,13 +16,19 @@
 
 <template>
   <div>
-    <span v-if="pending">Loading...</span>
+    <span
+      v-if="pending"
+      class="w-full h-screen flex items-center justify-center"
+    >
+      <Spinner />
+    </span>
+
     <span v-else-if="error">Error: {{ error.message }}</span>
 
     <main v-else-if="products">
       <FilterBar />
 
-      <section class="flex flex-wrap justify-start container mx-auto">
+      <section class="flex flex-wrap justify-center gap-2 md:gap-8">
         <ProductCard
           v-for="product in products.filter(filterFn).sort(sortFn)"
           :key="product.ProductID"

@@ -28,19 +28,19 @@
 </script>
 
 <template>
-  <div
-    :class="cn('group border rounded m-4  shadow bg-white', 'w-2/5 sm:w-56')"
-  >
-    <div
-      class="p-4 flex items-center justify-center border-b cursor-pointer relative"
-    >
-      <img
-        ref="imageRef"
-        :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
-        alt="Image for {{ product.BrandInfo?.Description }}"
-        :class="'hover:scale-105 transition w-[150px]'"
-      />
-    </div>
+  <div :class="cn('group border rounded shadow bg-white', 'w-40 sm:w-56')">
+    <NuxtLink :to="`/products/${product.ProductID}`">
+      <div
+        class="p-4 flex items-center justify-center border-b cursor-pointer relative"
+      >
+        <img
+          ref="imageRef"
+          :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
+          alt="Image for {{ product.BrandInfo?.Description }}"
+          :class="'hover:scale-105 transition w-[150px]'"
+        />
+      </div>
+    </NuxtLink>
 
     <div class="p-4 flex flex-col gap-3 w-full">
       <span>
@@ -48,9 +48,11 @@
           {{ product.BrandInfo?.Description ?? "&nbsp;" }}
         </h3>
 
-        <h2 class="font-bold truncate hover:text-clip">
-          {{ product.MainDescription ?? "&nbsp;" }}
-        </h2>
+        <NuxtLink :to="`/products/${product.ProductID}`">
+          <h2 class="font-bold truncate hover:text-clip">
+            {{ product.MainDescription ?? "&nbsp;" }}
+          </h2>
+        </NuxtLink>
       </span>
 
       <p class="font-semibold text-xs p">
@@ -62,14 +64,14 @@
         class="w-full flex justify-between"
       >
         <button
-          class="py-2 px-4 bg-red-600 rounded text-white"
+          class="py-2 px-4 bg-red-600 rounded text-white hover:animate-wiggle"
           @click="removeFromCart"
         >
           -
         </button>
         <p class="py-2 px-4">{{ cartStore.getQuantity(product.ProductID) }}</p>
         <button
-          class="py-2 px-4 bg-red-600 rounded text-white"
+          class="py-2 px-4 bg-red-600 rounded text-white hover:animate-wiggle"
           @click="() => cartStore.addToCart(product.ProductID)"
         >
           +
