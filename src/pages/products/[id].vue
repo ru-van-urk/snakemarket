@@ -49,25 +49,27 @@
     </div>
 
     <div class="w-full bg-white rounded shadow">
-      <div class="p-4 flex justify-center items-center gap-40">
+      <div
+        class="p-4 flex justify-center items-center gap-5 md:gap-40 flex-col md:flex-row"
+      >
         <img
-          width="350"
           :src="product.ProductPictures.find((img) => img.IsPrimary)?.Url"
           :alt="`Productfoto voor ${product.MainDescription}`"
+          class="w-40 md:w-96"
         />
 
         <span class="flex flex-col gap-5 justify-center w-52">
           <span>
-            <h3 class="font-light text-xl">
+            <h3 class="font-light text-base md:text-xl">
               {{ product.BrandInfo?.Description ?? "&nbsp;" }}
             </h3>
 
-            <h2 class="font-bold truncate hover:text-clip text-2xl">
+            <h2 class="font-bold truncate hover:text-clip text-xl md:text-2xl">
               {{ product.MainDescription ?? "&nbsp;" }}
             </h2>
           </span>
 
-          <p class="font-semibold p">
+          <p class="font-semibold text-sm md:text-base">
             €{{ product.ProductPrices[0].RegularPrice ?? "&nbsp;" }} per stuk
           </p>
 
@@ -98,7 +100,7 @@
                 cn(
                   'bg-red-600 text-white py-2 px-4 rounded w-full',
                   'hover:animate-wiggle',
-                  'text-sm sm:text-base'
+                  'text-sm md:text-base'
                 )
               "
               @click="() => cartStore.addToCart(product.ProductID)"
